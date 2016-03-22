@@ -15,6 +15,7 @@ import py2exe
 
 import os
 import sys
+
 sys.path.append(os.getcwd() + '\\src')
 
 py2exe_options = {
@@ -30,7 +31,9 @@ setup(
 	name='Bioinformatics python tools on windows platform',
 	description='Bioinformatics python tools on windows platform',
 	version='1.0.0',
-	windows=[{'script': './src/extract_seq.py', 'icon_resources': [(0, 'images/icon.ico')]}],
+	console=[{'script': './src/extract_seq.py', 'icon_resources': [(0, 'images/icon.ico')]},
+			 {'script': './src/download_from_genbank.py', 'icon_resources': [(0, 'images/icon.ico')]},
+			 {'script': './src/download_from_swissprot.py', 'icon_resources': [(0, 'images/icon.ico')]}],
 	zipfile=None,
 	options={'py2exe': py2exe_options},
 	author='deangao',
