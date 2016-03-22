@@ -18,7 +18,7 @@ from Bio import SeqIO
 from wxbiopyutils import parse_config, gen_logger
 
 
-def download_from_swissprot(id_file, output_file):
+def download_from_swissprot(id_file, output_file, rettype="swiss", save_format="swiss"):
 	"""
 	:type id_file: basestring
 	:type output_file: basestring
@@ -35,8 +35,8 @@ def download_from_swissprot(id_file, output_file):
 			except urllib2.HTTPError as e:
 				log.warning('{0} query failed'.format(query_id))
 
-			seq_record = SeqIO.read(handle, 'swiss')
-			SeqIO.write(seq_record, output_file_handle, 'fasta')
+			seq_record = SeqIO.read(handle, rettype)
+			SeqIO.write(seq_record, output_file_handle, save_format)
 			log.info('#{1} Processed {0}'.format(seq_record.id, cnt))
 			cnt += 1
 			handle.close()
@@ -55,8 +55,15 @@ if __name__ == '__main__':
 	opener = urllib2.build_opener(urllib2.ProxyHandler({'http': proxy}))
 	urllib2.install_opener(opener)
 
-	if conf and conf['idlist']['file_path'] and conf['output']['file_path']:
-		download_from_swissprot(conf['idlist']['file_path'], conf['output']['file_path'])
+	if conf \
+			and conf['idlist']['file_path'] \
+			and conf['output']['file_path'] \
+			and conf['swissprot']['rettype'] \
+			and conf['output']['format']:
+		download_from_swissprot(conf['idlist']['file_path'],
+								conf['output']['file_path'],
+								rettype=conf['swissprot']['rettype'],
+								save_format=conf['output']['format'])
 		log.info('Read configure file')
 	else:
 		log.error('Read configure file error')

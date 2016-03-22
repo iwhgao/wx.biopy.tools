@@ -18,7 +18,7 @@ from Bio import Entrez
 from wxbiopyutils import parse_config, gen_logger
 
 
-def download_from_genbank(id_file, output_file, db="nucleotide", rettype="fasta", retmode="text"):
+def download_from_genbank(id_file, output_file, db="nucleotide", rettype="fasta", retmode="text", save_format="fasta"):
 	"""
 	:type id_file: basestring
 	:type output_file: basestring
@@ -35,7 +35,7 @@ def download_from_genbank(id_file, output_file, db="nucleotide", rettype="fasta"
 	output_file_handle = open(output_file, 'w')
 	cnt = 1
 	for seq_record in SeqIO.parse(handle, rettype):
-		SeqIO.write(seq_record, output_file_handle, 'fasta')
+		SeqIO.write(seq_record, output_file_handle, save_format)
 		log.info('#{1} Processed {0}'.format(seq_record.id, cnt))
 		cnt += 1
 	handle.close()
@@ -54,12 +54,13 @@ if __name__ == '__main__':
 	opener = urllib2.build_opener(urllib2.ProxyHandler({'http': proxy}))
 	urllib2.install_opener(opener)
 
-	if conf and conf['idlist']['file_path'] and conf['output']['file_path']:
+	if conf and conf['idlist']['file_path'] and conf['output']['file_path'] and conf['output']['format']:
 		download_from_genbank(conf['idlist']['file_path'],
 							  conf['output']['file_path'],
 							  db=conf['genbank']['db'],
 							  rettype=conf['genbank']['rettype'],
-							  retmode=conf['genbank']['retmode'])
+							  retmode=conf['genbank']['retmode'],
+							  save_format=conf['output']['format'])
 		log.info('Read configure file')
 	else:
 		log.error('Read configure file error')
