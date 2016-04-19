@@ -13,29 +13,28 @@
 from configobj import ConfigObj
 import logging
 
+
 def parse_config(conf_file):
+	config = None
+	try:
+		config = ConfigObj(conf_file, encoding='UTF8')
+	except Exception as e:
+		print e
 
-    config = None
-    try:
-        config = ConfigObj(conf_file, encoding='UTF8')
-    except Exception as e:
-        print e
-
-    return config
+	return config
 
 
 def gen_logger(log_file):
+	log_file = log_file.replace('.py', '.log')
+	log_file = log_file.replace('.exe', '.log')
 
-    log_file = log_file.replace('.py', '.log')
-    log_file = log_file.replace('.exe', '.log')
+	log_file = '../log/' + log_file
 
-    log_file = '../log/' + log_file
+	logging.basicConfig(level=logging.DEBUG,
+						format='%(asctime)s|%(levelname)s|%(message)s',
+						datefmt='%Y-%m-%d %H:%M:%S',
+						filename=log_file,
+						filemode='a')
+	log = logging.getLogger()
 
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s|%(levelname)s|%(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S',
-                        filename=log_file,
-                        filemode='a')
-    log = logging.getLogger()
-
-    return log
+	return log

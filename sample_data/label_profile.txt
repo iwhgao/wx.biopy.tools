@@ -1,0 +1,14 @@
+#chr_id chr_posi    label_name  lable_size  tick_size   label_color tick_color tick_left_or_right
+chr1,14023000,GbPDF1,24,92,red,black,
+chr2,423000,GbPDF10,24,82,red,red,
+chr2,30023000,,,76,,green,left
+chr3,14023000,GbPDF11,24,92,red,black,
+chr4,423000,GbPDF12,24,82,red,red,
+chr5,30023000,,,76,,green,left
+chr5,31023000,,,46,,green,left
+chr5,32023000,,,46,,green,left
+chr5,33023000,,,46,,green,right
+chr5,34023000,,,76,,green,right
+chr6,30023000,,,46,,green,left
+chr7,20023000,,,76,,green,left
+chr7,20023000,,,76,,grey,right
