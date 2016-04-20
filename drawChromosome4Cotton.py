@@ -193,6 +193,7 @@ def draw_pic(dwg, conffile):
 		dwg.add(svgwrite.shapes.Rect(insert=(all_chr_posi[chr_tmp]['x'], all_chr_posi[chr_tmp]['y']),
 									 size=(all_chr_posi[chr_tmp]['w'], all_chr_posi[chr_tmp]['h']),
 									 rx=rx, ry=ry,
+									 stroke="black",
 									 fill=all_chr_posi[chr_tmp]['chr'][3]))
 
 	# 绘制chr name
@@ -223,7 +224,7 @@ if __name__ == '__main__':
 						   size=(int(conf['image_settings']['image_width']),
 								 int(conf['image_settings']['image_height']))
 						   )
-	dwg.add(dwg.text('Cotton Genome', insert=(500, 40),
+	dwg.add(dwg.text('Cotton Genome', insert=(1250, 40),
 					 font_size="30",
 					 fill="black",
 					 stroke="none",
