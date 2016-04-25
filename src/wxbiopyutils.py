@@ -10,11 +10,22 @@
 # ---------------------------
 
 
-from configobj import ConfigObj
+import os
+import re
 import logging
+from configobj import ConfigObj
+
+
+# 获取src的上一级目录
+basedir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def parse_config(conf_file):
+	"""
+	解析配置文件
+	:param conf_file:
+	:return:
+	"""
 	config = None
 	try:
 		config = ConfigObj(conf_file, encoding='UTF8')
@@ -25,10 +36,15 @@ def parse_config(conf_file):
 
 
 def gen_logger(log_file):
-	log_file = log_file.replace('.py', '.log')
-	log_file = log_file.replace('.exe', '.log')
+	"""
+	获取log对象
+	:param log_file:
+	:return:
+	"""
+	log_file = re.sub('\.py$', '.log', log_file)
+	log_file = re.sub('\.exe$', '.log', log_file)
 
-	log_file = '../log/' + log_file
+	log_file = basedir + '/log/' + log_file
 
 	logging.basicConfig(level=logging.DEBUG,
 						format='%(asctime)s|%(levelname)s|%(message)s',
@@ -38,3 +54,7 @@ def gen_logger(log_file):
 	log = logging.getLogger()
 
 	return log
+
+
+if __name__ == '__main__':
+	print basedir

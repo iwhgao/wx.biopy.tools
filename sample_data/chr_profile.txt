@@ -1,4 +1,4 @@
-#chr_id chr_name    chr_size(bp)    chr_color(rgb)
+#chr_id chr_name    chr_size(bp)    chr_color()
 A01	A01	99884700	grey
 A02	A02	83447906	grey
 A03	A03	100263045	grey

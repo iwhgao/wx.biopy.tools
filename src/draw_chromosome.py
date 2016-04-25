@@ -10,43 +10,8 @@
 
 
 import re
-import sys
-import logging
 import svgwrite
-from configobj import ConfigObj
-
-
-def parse_config(conf_file):
-	"""
-	:param conf_file:
-	:return:
-	"""
-
-	config = None
-	try:
-		config = ConfigObj(conf_file, encoding='UTF8')
-	except Exception as e:
-		print e
-
-	return config
-
-
-def gen_logger(log_file):
-	"""
-	:param log_file:
-	:return:
-	"""
-
-	log_file = log_file.replace('.py', '.log')
-	log_file = log_file.replace('.exe', '.log')
-
-	logging.basicConfig(level=logging.DEBUG,
-						format='%(asctime)s|%(levelname)s|%(message)s',
-						datefmt='%Y-%m-%d %H:%M:%S',
-						filename=log_file,
-						filemode='a')
-	log = logging.getLogger()
-	return log
+from wxbiopyutils import gen_logger, parse_config, basedir
 
 
 def get_chr_layout(conffile):
@@ -56,14 +21,13 @@ def get_chr_layout(conffile):
 	:return: layouts
 	"""
 
-	# TODO: 暂时默认弄两层， 后面再优化
-	layouts = []
-	layouts.append([])
-	layouts.append([])
+	layouts = {}
 	chr_order_layout = conffile['chromosome_settings']['orders']
-	for chr in chr_order_layout:
-		res = re.findall('(.*?)\(([0-9]+)\)', chr)
+	for chr_tmp in chr_order_layout:
+		res = re.findall('(.*?)\(([0-9]+)\)', chr_tmp)
 		if len(res[0]) == 2:
+			if str(int(res[0][1]) - 1) not in layouts:
+				layouts[str(int(res[0][1]) - 1)] = []
 			layouts[int(res[0][1]) - 1].append(res[0][0])
 
 	# print layouts
@@ -80,7 +44,7 @@ def parse_chr_profile(chr_profile):
 	"""
 
 	max_length = 0
-	chrs = {}
+	chrs_profile = {}
 	with open(chr_profile, 'r') as f:
 		for line in f:
 			if re.match('^#', line):
@@ -94,9 +58,9 @@ def parse_chr_profile(chr_profile):
 			if max_length < int(regions[2]):
 				max_length = int(regions[2])
 
-			chrs[regions[0]] = regions
+			chrs_profile[regions[0]] = regions
 
-	return max_length, chrs
+	return max_length, chrs_profile
 
 
 def get_chr_posi(conffile):
@@ -114,12 +78,9 @@ def get_chr_posi(conffile):
 	factor = float(chr_height) / max_length
 	for l, lay_chrs in enumerate(layouts):
 		for c, chr in enumerate(lay_chrs):
-			chr_profile = {}
-			chr_profile["x"] = left_margin + c * chr_width + c * chr_left_margin
-			chr_profile["y"] = (l+1)*layout_top_margin + (l+1)*chr_label_height + l * chr_height
-			chr_profile["w"] = chr_width
-			chr_profile["h"] = int(float(chrs[chr][2]) * factor)
-			chr_profile["chr"] = chrs[chr]
+			chr_profile = {"x": left_margin + c * chr_width + c * chr_left_margin,
+						   "y": (l + 1) * layout_top_margin + (l + 1) * chr_label_height + l * chr_height,
+						   "w": chr_width, "h": int(float(chrs[chr][2]) * factor), "chr": chrs[chr]}
 			chr_posi[chr] = chr_profile
 
 	# print chr_posi
@@ -140,7 +101,7 @@ def get_chr_label_posi(conffile):
 	return chr_label
 
 
-def get_mark_label_posi(all_chrs, fac, mark_profile, conffile):
+def get_tick_label_posi(all_chrs, fac, mark_profile, conffile):
 	marks_ticks = []
 	marks_labels = []
 	with open(mark_profile, 'r') as f:
@@ -157,13 +118,13 @@ def get_mark_label_posi(all_chrs, fac, mark_profile, conffile):
 				log.error('Number of fields in chromosome profile is less then 4')
 			elif len(regions) == 8:
 				if regions[7] == "" or regions[7] == "right":
-					mark_tick["x1"] = int(all_chrs[regions[0]]["x"] + float(conffile['chromosome_settings']['chr_width']))
+					mark_tick["x1"] = int(all_chrs[regions[0]]["x"] + float(conffile['chromosome_settings']['chr_width'])) + 1
 					mark_tick["y1"] = int(all_chrs[regions[0]]["y"] + float(regions[1])*fac)
 					mark_tick["x2"] = mark_tick["x1"] + int(regions[4])
 					mark_tick["y2"] = mark_tick["y1"]
 					mark_tick["color"] = regions[6]
 				elif regions[7] == "left":
-					mark_tick["x1"] = int(all_chrs[regions[0]]["x"])
+					mark_tick["x1"] = int(all_chrs[regions[0]]["x"]) - 1
 					mark_tick["y1"] = int(all_chrs[regions[0]]["y"] + float(regions[1])*fac)
 					mark_tick["x2"] = mark_tick["x1"] - int(regions[4])
 					mark_tick["y2"] = mark_tick["y1"]
@@ -186,7 +147,7 @@ def draw_pic(dwg, conffile):
 	ry = int(conf['chromosome_settings']['ry'])
 	all_chr_posi, fac = get_chr_posi(conffile)
 	all_chr_label = get_chr_label_posi(conffile)
-	all_marks_ticks, all_marks_labels = get_mark_label_posi(all_chr_posi, fac, conffile['chromosome_settings']['label_profile'], conffile)
+	all_marks_ticks, all_marks_labels = get_tick_label_posi(all_chr_posi, fac, conffile['chromosome_settings']['label_profile'], conffile)
 
 	# 绘制chr框架
 	for chr_tmp in all_chr_posi:
@@ -194,6 +155,7 @@ def draw_pic(dwg, conffile):
 									 size=(all_chr_posi[chr_tmp]['w'], all_chr_posi[chr_tmp]['h']),
 									 rx=rx, ry=ry,
 									 stroke="black",
+									 stroke_width="3",
 									 fill=all_chr_posi[chr_tmp]['chr'][3]))
 
 	# 绘制chr name
@@ -212,13 +174,16 @@ def draw_pic(dwg, conffile):
 	# 绘制label
 	for mark_label in all_marks_labels:
 		dwg.add(dwg.text(mark_label["title"], insert=(mark_label["x"], mark_label["y"] + 9),
-						 font_size="18",
+						 font_size="22",
 						 fill=mark_label["color"],
 						 stroke=mark_label["color"]))
 
 if __name__ == '__main__':
-	conf = parse_config('./conf/draw.ini')
-	log = gen_logger('./log/draw.log')
+	log_basename = __file__
+	log = gen_logger(log_basename)
+	log.info('Start!')
+
+	conf = parse_config(basedir + '/conf/draw_chromosome.ini')
 
 	dwg = svgwrite.Drawing(conf['global_settings']['output_filename'], profile='tiny',
 						   size=(int(conf['image_settings']['image_width']),

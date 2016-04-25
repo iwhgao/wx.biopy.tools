@@ -10,12 +10,10 @@
 # ---------------------------
 
 
-import sys
-import os
 import urllib2
 from Bio import SeqIO
 from Bio import Entrez
-from wxbiopyutils import parse_config, gen_logger
+from wxbiopyutils import parse_config, gen_logger, basedir
 
 
 def download_from_genbank(id_file, output_file, db="nucleotide", rettype="fasta", retmode="text", save_format="fasta"):
@@ -43,16 +41,17 @@ def download_from_genbank(id_file, output_file, db="nucleotide", rettype="fasta"
 
 
 if __name__ == '__main__':
-	log_basename = (os.path.split(sys.argv[0]))[1]
+	log_basename = __file__
 	log = gen_logger(log_basename)
 	log.info('Start!')
 
-	conf = parse_config('../conf/download_from_genbank.ini')
+	conf = parse_config(basedir + '/conf/download_from_gebank.ini')
 
 	# 代理
-	proxy = 'web-proxy.oa.com:8080'
-	opener = urllib2.build_opener(urllib2.ProxyHandler({'http': proxy}))
-	urllib2.install_opener(opener)
+	if 'is_proxy' in conf['global'] and conf['global']['is_proxy'] == "1":
+		proxy = conf['proxy']['proxy']
+		opener = urllib2.build_opener(urllib2.ProxyHandler({'http': proxy}))
+		urllib2.install_opener(opener)
 
 	if conf and conf['idlist']['file_path'] and conf['output']['file_path'] and conf['output']['format']:
 		download_from_genbank(conf['idlist']['file_path'],

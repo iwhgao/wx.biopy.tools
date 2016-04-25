@@ -10,12 +10,10 @@
 # ---------------------------
 
 
-import sys
-import os
 import urllib2
 from Bio import ExPASy
 from Bio import SeqIO
-from wxbiopyutils import parse_config, gen_logger
+from wxbiopyutils import parse_config, gen_logger, basedir
 
 
 def download_from_swissprot(id_file, output_file, rettype="swiss", save_format="swiss"):
@@ -44,16 +42,17 @@ def download_from_swissprot(id_file, output_file, rettype="swiss", save_format="
 	log.info('Total {0} queries done!'.format(cnt - 1))
 
 if __name__ == '__main__':
-	log_basename = (os.path.split(sys.argv[0]))[1]
+	log_basename = __file__
 	log = gen_logger(log_basename)
 	log.info('Start!')
 
-	conf = parse_config('../conf/download_from_swissprot.ini')
+	conf = parse_config(basedir + '/conf/download_from_swissprot.ini')
 
 	# 代理
-	proxy = 'web-proxy.oa.com:8080'
-	opener = urllib2.build_opener(urllib2.ProxyHandler({'http': proxy}))
-	urllib2.install_opener(opener)
+	if 'is_proxy' in conf['global'] and conf['global']['is_proxy'] == "1":
+		proxy = conf['proxy']['proxy']
+		opener = urllib2.build_opener(urllib2.ProxyHandler({'http': proxy}))
+		urllib2.install_opener(opener)
 
 	if conf \
 			and conf['idlist']['file_path'] \

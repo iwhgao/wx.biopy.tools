@@ -8,12 +8,10 @@
 # Created: 2016/3/21
 # ---------------------------
 
-import sys
-import os
 import re
 from Bio import SeqIO
 from Bio import SeqRecord
-from wxbiopyutils import parse_config, gen_logger
+from wxbiopyutils import parse_config, gen_logger, basedir
 
 
 def extract_seq_from_file(seq_file, coords_file, output_file):
@@ -79,12 +77,11 @@ def extract_seq_from_file(seq_file, coords_file, output_file):
 
 
 if __name__ == '__main__':
-
-	log_basename = (os.path.split(sys.argv[0]))[1]
+	log_basename = __file__
 	log = gen_logger(log_basename)
 	log.info('Start!')
 
-	conf = parse_config('../conf/extract_seq.ini')
+	conf = parse_config(basedir + '/conf/extract_seq.ini')
 
 	if conf and conf['seq']['file_path'] and conf['coords']['file_path'] and conf['output']['file_path']:
 		extract_seq_from_file(conf['seq']['file_path'], conf['coords']['file_path'], conf['output']['file_path'])
