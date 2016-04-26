@@ -75,6 +75,7 @@ def get_chr_posi(conffile):
 	chr_width = int(conffile['chromosome_settings']['chr_width'])
 
 	chr_posi = {}
+	# 计算染色体长度和实际像素长度间的换算因子
 	factor = float(chr_height) / max_length
 	for l, lay_chrs in enumerate(layouts):
 		for c, chr in enumerate(lay_chrs):
